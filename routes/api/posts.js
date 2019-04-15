@@ -64,13 +64,13 @@ router.post(
 );
 
 // @route   DELETE api/posts/:id
-// @desc    Get post
+// @desc    Delete post
 // @access  Private
 router.delete(
     '/:id',
     passport.authenticate('jwt', { session: false }),
     (req, res) => {
-        Post.findOne({ _id: req.params.id })
+        Post.findById(req.params.id)
             .then(post => {
                 if (post.user.toString() !== req.user.id) {
                     // User is not authorized if user is not post author
@@ -81,6 +81,71 @@ router.delete(
 
                 // Post is successfully deleted
                 post.remove().then(() => res.json({ success: 'Post deleted' }));
+            })
+            .catch(err =>
+                res.status(404).json({ postnotfound: 'No post found' })
+            );
+    }
+);
+
+// @route   POST api/posts/like/:id
+// @desc    Like post
+// @access  Private
+router.post(
+    '/like/:id',
+    passport.authenticate('jwt', { session: false }),
+    (req, res) => {
+        Post.findById(req.params.id)
+            .then(post => {
+                if (
+                    post.likes.filter(
+                        like => like.user.toString() === req.user.id
+                    ).length > 0
+                ) {
+                    return res
+                        .status(400)
+                        .json({ alreadyliked: 'User already liked this post' });
+                }
+
+                // Add user id to likes array
+                post.likes.unshift({ user: req.user.id });
+
+                post.save().then(post => res.json(post));
+            })
+            .catch(err =>
+                res.status(404).json({ postnotfound: 'No post found' })
+            );
+    }
+);
+
+// @route   POST api/posts/unlike/:id
+// @desc    Unlike post
+// @access  Private
+router.post(
+    '/unlike/:id',
+    passport.authenticate('jwt', { session: false }),
+    (req, res) => {
+        Post.findById(req.params.id)
+            .then(post => {
+                if (
+                    post.likes.filter(
+                        like => like.user.toString() === req.user.id
+                    ).length === 0
+                ) {
+                    return res
+                        .status(400)
+                        .json({ notliked: 'You have not yet liked this post' });
+                }
+
+                // Find user in the likes and remove
+                for (let i = 0; i < post.likes.length; i++) {
+                    if (post.likes[i].user.toString() === req.user.id) {
+                        post.likes.splice(i, 1);
+                    }
+                }
+
+                // Save
+                post.save().then(post => res.json(post));
             })
             .catch(err =>
                 res.status(404).json({ postnotfound: 'No post found' })
