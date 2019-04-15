@@ -70,15 +70,17 @@ router.delete(
     '/:id',
     passport.authenticate('jwt', { session: false }),
     (req, res) => {
-        Post.findOneAndRemove({ _id: req.params.id, user: req.user.id })
+        Post.findOne({ _id: req.params.id })
             .then(post => {
-                // If no post then user is not authorized to delete
-                // otherwise, the post is deleted
-                return !post
-                    ? res
-                          .status(404)
-                          .json({ notauthorized: 'User not authorized' })
-                    : res.status(200).json({ success: 'Post deleted' });
+                if (post.user.toString() !== req.user.id) {
+                    // User is not authorized if user is not post author
+                    return res.status(401).json({
+                        notauthorized: 'User not authorized'
+                    });
+                }
+
+                // Post is successfully deleted
+                post.remove().then(() => res.json({ success: 'Post deleted' }));
             })
             .catch(err =>
                 res.status(404).json({ postnotfound: 'No post found' })
