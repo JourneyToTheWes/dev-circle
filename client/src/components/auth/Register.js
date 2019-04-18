@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import { withRouter } from 'react-router-dom';
 import classnames from 'classnames';
 import { connect } from 'react-redux';
 import { registerUser } from '../../actions/authActions';
@@ -20,6 +20,12 @@ class Register extends Component {
         this.onSubmit = this.onSubmit.bind(this);
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.errors) {
+            this.setState({ errors: nextProps.errors });
+        }
+    }
+
     onChange(event) {
         this.setState({ [event.target.name]: event.target.value });
     }
@@ -34,22 +40,14 @@ class Register extends Component {
             confirmPassword: this.state.confirmPassword
         };
 
-        this.props.registerUser(newUser);
-
-        // axios
-        //     .post('/api/users/register', newUser)
-        //     .then(res => console.log(res.data))
-        //     .catch(err => this.setState({ errors: err.response.data }));
+        this.props.registerUser(newUser, this.props.history);
     }
 
     render() {
         const { errors } = this.state;
 
-        const { user } = this.props.auth;
-
         return (
             <div className="register">
-                {user ? user.name : null}
                 <div className="container">
                     <div className="row">
                         <div className="col-md-8 m-auto">
@@ -158,16 +156,18 @@ class Register extends Component {
 
 Register.propTypes = {
     registerUser: PropTypes.func.isRequired,
-    auth: PropTypes.object.isRequired
+    auth: PropTypes.object.isRequired,
+    errors: PropTypes.object.isRequired
 };
 
 // Use 'this.props.auth' to access any value
 const mapStateToProps = state => ({
     // state.auth comes from root reducer 'auth' property
-    auth: state.auth
+    auth: state.auth,
+    errors: state.errors
 });
 
 export default connect(
     mapStateToProps,
     { registerUser }
-)(Register);
+)(withRouter(Register)); // Component can have access to this.props.history to redirect user
