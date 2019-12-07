@@ -1,126 +1,87 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { registerUser } from '../../actions/authActions';
-import TextFieldGroup from '../common/TextFieldGroup';
+import React, { Fragment, useState } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
 
-class Register extends Component {
-    constructor() {
-        super();
-        this.state = {
-            name: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-            errors: {}
-        };
+const Register = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    });
 
-        this.onChange = this.onChange.bind(this);
-        this.onSubmit = this.onSubmit.bind(this);
-    }
+    const { name, email, password, confirmPassword } = formData;
 
-    componentDidMount() {
-        if (this.props.auth.isAuthenticated) {
-            this.props.history.push('/dashboard');
+    const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    const onSubmit = async e => {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            console.log('Passwords do not match');
+        } else {
+            const newUser = {
+                name,
+                email,
+                password,
+                confirmPassword
+            };
+            console.log('Register success');
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.errors) {
-            this.setState({ errors: nextProps.errors });
-        }
-    }
-
-    onChange(event) {
-        this.setState({ [event.target.name]: event.target.value });
-    }
-
-    onSubmit(event) {
-        event.preventDefault();
-
-        const newUser = {
-            name: this.state.name,
-            email: this.state.email,
-            password: this.state.password,
-            confirmPassword: this.state.confirmPassword
-        };
-
-        this.props.registerUser(newUser, this.props.history);
-    }
-
-    render() {
-        const { errors } = this.state;
-
-        return (
-            <div className="register">
-                <div className="container">
-                    <div className="row">
-                        <div className="col-md-8 m-auto">
-                            <h1 className="display-4 text-center">Sign Up</h1>
-                            <p className="lead text-center">
-                                Create your DevCircle account
-                            </p>
-                            <form onSubmit={this.onSubmit}>
-                                <TextFieldGroup
-                                    placeholder="Name"
-                                    name="name"
-                                    value={this.state.name}
-                                    onChange={this.onChange}
-                                    error={errors.name}
-                                />
-                                <TextFieldGroup
-                                    placeholder="Email Address"
-                                    name="email"
-                                    type="email"
-                                    value={this.state.email}
-                                    onChange={this.onChange}
-                                    error={errors.email}
-                                    info="This site uses Gravatar so if you want a profile image, use a Gravatar email"
-                                />
-                                <TextFieldGroup
-                                    placeholder="Password"
-                                    name="password"
-                                    type="password"
-                                    value={this.state.password}
-                                    onChange={this.onChange}
-                                    error={errors.password}
-                                />
-                                <TextFieldGroup
-                                    placeholder="Password"
-                                    name="confirmPassword"
-                                    type="password"
-                                    value={this.state.confirmPassword}
-                                    onChange={this.onChange}
-                                    error={errors.confirmPassword}
-                                />
-                                <input
-                                    type="submit"
-                                    className="btn btn-info btn-block mt-4"
-                                />
-                            </form>
-                        </div>
-                    </div>
-                </div>
+    return <Fragment>
+        <h1 className="large text-primary">Sign Up</h1>
+        <p className="lead"><i className="fas fa-user"></i> Create Your Account</p>
+        <form className="form" onSubmit={e => onSubmit(e)}>
+            <div className="form-group">
+                <input
+                    type="text"
+                    placeholder="Name"
+                    name="name"
+                    value={name}
+                    onChange={e => onChange(e)}
+                    required
+                />
             </div>
-        );
-    }
+            <div className="form-group">
+                <input
+                    type="email"
+                    placeholder="Email Address"
+                    value={email}
+                    onChange={e => onChange(e)}
+                    name="email"
+                />
+                <small className="form-text"
+                >This site uses Gravatar so if you want a profile image, use a
+            Gravatar email</small
+                >
+            </div>
+            <div className="form-group">
+                <input
+                    type="password"
+                    placeholder="Password"
+                    name="password"
+                    value={password}
+                    onChange={e => onChange(e)}
+                    minLength="6"
+                />
+            </div>
+            <div className="form-group">
+                <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    name="confirmPassword"
+                    value={confirmPassword}
+                    onChange={e => onChange(e)}
+                    minLength="6"
+                />
+            </div>
+            <input type="submit" className="btn btn-primary" value="Register" />
+        </form>
+        <p className="my-1">
+            Already have an account? <Link to="/login">Sign In</Link>
+        </p>
+    </Fragment>;
 }
 
-Register.propTypes = {
-    registerUser: PropTypes.func.isRequired,
-    auth: PropTypes.object.isRequired,
-    errors: PropTypes.object.isRequired
-};
-
-// Use 'this.props.auth' to access any value
-const mapStateToProps = state => ({
-    // state.auth comes from root reducer 'auth' property
-    auth: state.auth,
-    errors: state.errors
-});
-
-export default connect(
-    mapStateToProps,
-    { registerUser }
-)(withRouter(Register)); // Component can have access to this.props.history to redirect user
+export default Register;
