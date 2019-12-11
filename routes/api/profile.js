@@ -359,15 +359,17 @@ router.delete("/education/:edu_id", auth, async (req, res) => {
 		if (removeIndex === -1) {
 			return res.status(500).json({ msg: "Server error" });
 		} else {
-      // theses console logs helped me figure it out
-      /*   console.log("eduIds", eduIds);
-      console.log("typeof eduIds", typeof eduIds);
-      console.log("req.params", req.params);
-      console.log("removed", eduIds.indexOf(req.params.edu_id));
- */ foundProfile.education.splice(
-			removeIndex,
-			1,
-		);
+			// theses console logs helped me figure it out
+			/*   
+				  console.log("eduIds", eduIds);
+			  console.log("typeof eduIds", typeof eduIds);
+			  console.log("req.params", req.params);
+			  console.log("removed", eduIds.indexOf(req.params.edu_id));
+			  */
+			foundProfile.education.splice(
+				removeIndex,
+				1,
+			);
 			await foundProfile.save();
 			return res.status(200).json(foundProfile);
 		}
