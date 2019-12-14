@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Spinner from '../layout/Spinner';
 import DashboardLinks from '../dashboard/DashboardLinks';
+import Experience from '../dashboard/Experience';
+import Education from '../dashboard/Education';
 import { getCurrentProfile } from '../../actions/profileActions';
 
 const Dashboard = ({
@@ -26,6 +28,8 @@ const Dashboard = ({
                 ? (
                     <Fragment>
                         <DashboardLinks />
+                        <Experience experience={profile.experience} />
+                        <Education education={profile.education} />
                     </Fragment>
                 )
                 : (
