@@ -1,5 +1,5 @@
 {
-  "mongoURI": "mongodb://wesley:devcircle1@ds227243.mlab.com:27243/devcircle",
+  "mongoURI": "mongodb://localhost:27017/devcircle",
   "jwtSecret": "secret",
   "githubClientId": "691250e032704e6e12e9",
   "githubSecret": "1f2809098824bf397b9a076812b13436deb350e2"
